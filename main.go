@@ -2,17 +2,24 @@ package main
 
 import (
 	"fmt"
-	"os"
+	"log"
 
-	"github.com/hreshchyshynt/gator/internal/config"
+	cfg "github.com/hreshchyshynt/gator/internal/config"
 )
 
 func main() {
-	config, err := config.Read()
+	config, err := cfg.Read()
 	if err != nil {
-		fmt.Printf("error read config: %v", err)
-		os.Exit(1)
+		log.Fatalf("error read config: %v", err)
 	}
 
-	fmt.Printf("Config read: %v", config)
+	err = config.SetUser("lane")
+	if err != nil {
+		log.Fatalf("Failed to set user for config: %v", err)
+	}
+	config, err = cfg.Read()
+	if err != nil {
+		log.Fatalf("error read new config: %v", err)
+	}
+	fmt.Printf("New config read: %v", config)
 }
