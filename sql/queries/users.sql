@@ -14,3 +14,6 @@ where users.name = $1;
 
 -- name: ClearUsers :exec
 delete  from users;
+
+-- name: GetAllUsers :many
+select * from users;

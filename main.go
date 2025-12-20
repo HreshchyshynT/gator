@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -32,6 +33,7 @@ func main() {
 	commands.Register("login", handleLogin)
 	commands.Register("register", handleRegister)
 	commands.Register("reset", handleReset)
+	commands.Register("users", handleGetAllUsers)
 
 	args := os.Args
 
@@ -106,10 +108,31 @@ func handleRegister(s *State, cmd Command) error {
 	return nil
 }
 
-func handleReset(s *State, cmd Command) error {
+func handleReset(s *State, _ Command) error {
 	err := s.db.ClearUsers(context.Background())
 	if err == nil {
 		fmt.Println("Table \"users\" cleared.")
 	}
 	return err
+}
+
+func handleGetAllUsers(s *State, cmd Command) error {
+	users, err := s.db.GetAllUsers(context.Background())
+	if err != nil {
+		return fmt.Errorf("can't get all users: %v", err)
+	}
+
+	var buffer strings.Builder
+
+	for _, u := range users {
+		if u.Name == s.config.CurrentUserName {
+			buffer.WriteString("* " + u.Name + " (current)\n")
+		} else {
+			buffer.WriteString("* " + u.Name + "\n")
+		}
+	}
+
+	fmt.Print(buffer.String())
+
+	return nil
 }
