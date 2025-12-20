@@ -11,3 +11,6 @@ values (
 -- name: GetUser :one
 select * from users 
 where users.name = $1;
+
+-- name: ClearUsers :exec
+delete  from users;

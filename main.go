@@ -31,6 +31,7 @@ func main() {
 
 	commands.Register("login", handleLogin)
 	commands.Register("register", handleRegister)
+	commands.Register("reset", handleReset)
 
 	args := os.Args
 
@@ -103,4 +104,12 @@ func handleRegister(s *State, cmd Command) error {
 	fmt.Printf("User has been created: %v\n", user)
 
 	return nil
+}
+
+func handleReset(s *State, cmd Command) error {
+	err := s.db.ClearUsers(context.Background())
+	if err == nil {
+		fmt.Println("Table \"users\" cleared.")
+	}
+	return err
 }
