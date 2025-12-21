@@ -13,6 +13,7 @@ import (
 	"github.com/google/uuid"
 	cfg "github.com/hreshchyshynt/gator/internal/config"
 	"github.com/hreshchyshynt/gator/internal/database"
+	"github.com/hreshchyshynt/gator/internal/rss"
 	_ "github.com/lib/pq"
 )
 
@@ -34,6 +35,7 @@ func main() {
 	commands.Register("register", handleRegister)
 	commands.Register("reset", handleReset)
 	commands.Register("users", handleGetAllUsers)
+	commands.Register("agg", handleAggregate)
 
 	args := os.Args
 
@@ -134,5 +136,23 @@ func handleGetAllUsers(s *State, cmd Command) error {
 
 	fmt.Print(buffer.String())
 
+	return nil
+}
+
+func handleAggregate(s *State, command Command) error {
+	if len(command.args) == 0 || len(command.args[0]) == 0 {
+		return fmt.Errorf("Agg command requires not empty feed url argument")
+	}
+	feed, err := rss.FetchFeed(context.Background(), command.args[0])
+	if err != nil {
+		return err
+	}
+	fmt.Printf(
+		"feed received: %v, link (%v), description (%v), items count: %v\n",
+		feed.Channel.Title,
+		feed.Channel.Link,
+		feed.Channel.Description,
+		len(feed.Channel.Items),
+	)
 	return nil
 }
