@@ -36,6 +36,7 @@ func main() {
 	commands.Register("reset", handleReset)
 	commands.Register("users", handleGetAllUsers)
 	commands.Register("agg", handleAggregate)
+	commands.Register("addfeed", handleAddFeed)
 
 	args := os.Args
 
@@ -61,7 +62,7 @@ func main() {
 
 func handleLogin(s *State, cmd Command) error {
 	if len(cmd.args) == 0 {
-		return errors.New("Login command requires username argument")
+		return errors.New("login command requires username argument")
 	}
 
 	username := cmd.args[0]
@@ -82,7 +83,7 @@ func handleLogin(s *State, cmd Command) error {
 
 func handleRegister(s *State, cmd Command) error {
 	if len(cmd.args) == 0 {
-		return errors.New("Register command requires username argument")
+		return errors.New("register command requires username argument")
 	}
 
 	username := cmd.args[0]
@@ -141,7 +142,7 @@ func handleGetAllUsers(s *State, cmd Command) error {
 
 func handleAggregate(s *State, command Command) error {
 	if len(command.args) == 0 || len(command.args[0]) == 0 {
-		return fmt.Errorf("Agg command requires not empty feed url argument")
+		return fmt.Errorf("agg command requires not empty feed url argument")
 	}
 	feed, err := rss.FetchFeed(context.Background(), command.args[0])
 	if err != nil {
@@ -154,5 +155,46 @@ func handleAggregate(s *State, command Command) error {
 		feed.Channel.Description,
 		len(feed.Channel.Items),
 	)
+	return nil
+}
+
+func handleAddFeed(s *State, command Command) error {
+	args := command.args
+	if len(args) < 2 || len(args[0]) == 0 || len(args[1]) == 0 {
+		return fmt.Errorf("addfeed command requires not empty feed name and url arguments")
+	}
+
+	feedName := args[0]
+	feedUrl := args[1]
+
+	userName := s.config.CurrentUserName
+	user, err := s.db.GetUser(context.Background(), userName)
+	if err != nil {
+		return fmt.Errorf("Can't get current user: %v", err)
+	}
+
+	_, err = rss.FetchFeed(context.Background(), feedUrl)
+
+	if err != nil {
+		return err
+	}
+
+	now := time.Now()
+
+	feed, err := s.db.CreateFeed(context.Background(), database.CreateFeedParams{
+		ID:        uuid.New(),
+		CreatedAt: now,
+		UpdatedAt: now,
+		Name:      feedName,
+		Url:       feedUrl,
+		UserID:    user.ID,
+	})
+
+	if err != nil {
+		return fmt.Errorf("Can't save feed to db: %v", err)
+	}
+
+	fmt.Printf("Feed receive: %v\n", feed)
+
 	return nil
 }
