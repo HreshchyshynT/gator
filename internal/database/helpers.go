@@ -18,3 +18,15 @@ func (u User) String() string {
 		u.Name,
 	)
 }
+
+func (f Feed) String() string {
+	return fmt.Sprintf(
+		"Feed(\n\tID: %v\n\tCreatedAt: %v\n\tUpdatedAt: %v\n\tName: %v\n\tUrl: %v\n\tUserId: %v\n)",
+		f.ID,
+		f.CreatedAt.Format(time.RFC3339),
+		f.UpdatedAt.Format(time.RFC3339),
+		f.Name,
+		f.Url,
+		f.UserID,
+	)
+}
