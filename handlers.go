@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -152,6 +153,19 @@ func handleAddFeed(s *State, command Command) error {
 }
 
 func handleListFeeds(s *State, command Command) error {
+	feeds, err := s.db.GetAllFeeds(context.Background())
+	if err != nil {
+		return fmt.Errorf("Can't retrieve feeds: %v", err)
+	}
+
+	var builder strings.Builder
+
+	for i, f := range feeds {
+		builder.WriteString(strconv.Itoa(i+1) + ": ")
+		builder.WriteString(f.Name + ", " + f.Url + ", added by " + f.Username + "\n")
+	}
+
+	fmt.Print(builder.String())
 
 	return nil
 }
