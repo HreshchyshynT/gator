@@ -147,6 +147,14 @@ func handleAddFeed(s *State, command Command) error {
 		return fmt.Errorf("Can't save feed to db: %v", err)
 	}
 
+	s.db.CreateFeedFollow(context.Background(), database.CreateFeedFollowParams{
+		FeedID:    feed.ID,
+		UserID:    user.ID,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+		ID:        uuid.New(),
+	})
+
 	fmt.Printf("Feed receive: %v\n", feed)
 
 	return nil
