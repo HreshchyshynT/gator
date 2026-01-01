@@ -12,3 +12,7 @@ values (
 -- name: GetAllFeeds :many
 select feeds.*, users.name as userName from feeds 
 inner join users on feeds.user_id = users.id;
+
+-- name: GetFeedByUrl :one
+select * from feeds
+where feeds.url = @url;
