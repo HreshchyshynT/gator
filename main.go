@@ -31,6 +31,7 @@ func main() {
 	commands.Register("agg", handleAggregate)
 	commands.Register("addfeed", handleAddFeed)
 	commands.Register("feeds", handleListFeeds)
+	commands.Register("follow", handleFeedFollow)
 
 	args := os.Args
 
@@ -45,7 +46,7 @@ func main() {
 
 	err = commands.Run(&state, command)
 	if err != nil {
-		log.Fatalf("Can not run %v: %v\n", command.name, err)
+		log.Fatal(err)
 	}
 
 	config, err = cfg.Read()

@@ -169,3 +169,40 @@ func handleListFeeds(s *State, command Command) error {
 
 	return nil
 }
+func handleFeedFollow(s *State, command Command) error {
+	if len(command.args) == 0 {
+		return fmt.Errorf("follow command required url argument")
+	}
+
+	url := command.args[0]
+
+	feed, err := s.db.GetFeedByUrl(context.Background(), url)
+	if err != nil {
+		return fmt.Errorf("Can't find feed for url: %v", url)
+	}
+
+	user, err := s.db.GetUser(context.Background(), s.config.CurrentUserName)
+
+	if err != nil {
+		return fmt.Errorf("Error getting current user")
+	}
+
+	now := time.Now()
+
+	params := database.CreateFeedFollowParams{
+		FeedID:    feed.ID,
+		UserID:    user.ID,
+		CreatedAt: now,
+		UpdatedAt: now,
+		ID:        uuid.New(),
+	}
+	feedFollowRow, err := s.db.CreateFeedFollow(context.Background(), params)
+
+	if err != nil {
+		return fmt.Errorf("Error following the feed: %v", err)
+	}
+
+	fmt.Printf("User %v now follows %v\n", feedFollowRow.UserName, feedFollowRow.FeedName)
+
+	return nil
+}
