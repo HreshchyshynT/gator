@@ -111,7 +111,7 @@ func handleAggregate(s *State, command Command) error {
 	return nil
 }
 
-func handleAddFeed(s *State, command Command) error {
+func handleAddFeed(s *State, command Command, user database.User) error {
 	args := command.args
 	if len(args) < 2 || len(args[0]) == 0 || len(args[1]) == 0 {
 		return fmt.Errorf("addfeed command requires not empty feed name and url arguments")
@@ -120,13 +120,7 @@ func handleAddFeed(s *State, command Command) error {
 	feedName := args[0]
 	feedUrl := args[1]
 
-	userName := s.config.CurrentUserName
-	user, err := s.db.GetUser(context.Background(), userName)
-	if err != nil {
-		return fmt.Errorf("Can't get current user: %v", err)
-	}
-
-	_, err = rss.FetchFeed(context.Background(), feedUrl)
+	_, err := rss.FetchFeed(context.Background(), feedUrl)
 
 	if err != nil {
 		return err
@@ -178,7 +172,7 @@ func handleListFeeds(s *State, command Command) error {
 	return nil
 }
 
-func handleFeedFollow(s *State, command Command) error {
+func handleFeedFollow(s *State, command Command, user database.User) error {
 	if len(command.args) == 0 {
 		return fmt.Errorf("follow command required url argument")
 	}
@@ -188,12 +182,6 @@ func handleFeedFollow(s *State, command Command) error {
 	feed, err := s.db.GetFeedByUrl(context.Background(), url)
 	if err != nil {
 		return fmt.Errorf("Can't find feed for url: %v", url)
-	}
-
-	user, err := s.db.GetUser(context.Background(), s.config.CurrentUserName)
-
-	if err != nil {
-		return fmt.Errorf("Error getting current user")
 	}
 
 	now := time.Now()
@@ -216,13 +204,7 @@ func handleFeedFollow(s *State, command Command) error {
 	return nil
 }
 
-func handleFollowing(s *State, command Command) error {
-	user, err := s.db.GetUser(context.Background(), s.config.CurrentUserName)
-
-	if err != nil {
-		return fmt.Errorf("Error getting current user")
-	}
-
+func handleFollowing(s *State, command Command, user database.User) error {
 	results, err := s.db.GetFeedFollowsForUser(context.Background(), user.ID)
 
 	if err != nil {
