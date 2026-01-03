@@ -33,6 +33,7 @@ func main() {
 	commands.Register("feeds", handleListFeeds)
 	commands.Register("follow", middlewareLoggedIn(handleFeedFollow))
 	commands.Register("following", middlewareLoggedIn(handleFollowing))
+	commands.Register("unfollow", middlewareLoggedIn(handleUnfollowing))
 
 	args := os.Args
 

@@ -26,3 +26,8 @@ from feed_follows
 INNER JOIN users on users.id = feed_follows.user_id
 INNER JOIN feeds on feeds.id = feed_follows.feed_id
 where feed_follows.user_id = @user_id;
+
+-- name: DeleteFeedFollow :exec
+delete from feed_follows 
+where user_id = @user_id and feed_id = @feed_id;
+

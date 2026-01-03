@@ -219,3 +219,28 @@ func handleFollowing(s *State, command Command, user database.User) error {
 
 	return nil
 }
+
+func handleUnfollowing(s *State, command Command, user database.User) error {
+	if len(command.args) == 0 {
+		return fmt.Errorf("unfollow requires url")
+	}
+
+	url := command.args[0]
+
+	feed, err := s.db.GetFeedByUrl(context.Background(), url)
+
+	if err != nil {
+		return fmt.Errorf("Error unfollow feed: %v", err)
+	}
+
+	err = s.db.DeleteFeedFollow(context.Background(), database.DeleteFeedFollowParams{
+		UserID: user.ID,
+		FeedID: feed.ID,
+	})
+
+	if err != nil {
+		return fmt.Errorf("Can not delete feed: ", err)
+	}
+
+	return nil
+}
