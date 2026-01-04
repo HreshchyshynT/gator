@@ -21,3 +21,7 @@ where feeds.url = @url;
 UPDATE feeds 
 SET updated_at = NOW() AND last_fetched_at = NOW()
 WHERE id = @feed_id;
+
+-- name: GetNextFeedToFetch :one
+SELECT * FROM feeds
+ORDER BY last_fetched_at ASC NULLS FIRST;
