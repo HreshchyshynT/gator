@@ -16,3 +16,8 @@ inner join users on feeds.user_id = users.id;
 -- name: GetFeedByUrl :one
 select * from feeds
 where feeds.url = @url;
+
+-- name: MarkFeedFetched :exec
+UPDATE feeds 
+SET updated_at = NOW() AND last_fetched_at = NOW()
+WHERE id = @feed_id;
