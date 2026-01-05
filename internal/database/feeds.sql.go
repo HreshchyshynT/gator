@@ -146,7 +146,7 @@ func (q *Queries) GetNextFeedToFetch(ctx context.Context) (Feed, error) {
 
 const markFeedFetched = `-- name: MarkFeedFetched :exec
 UPDATE feeds 
-SET updated_at = NOW() AND last_fetched_at = NOW()
+SET updated_at = NOW(), last_fetched_at = NOW()
 WHERE id = $1
 `
 
