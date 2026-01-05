@@ -239,7 +239,7 @@ func handleUnfollowing(s *State, command Command, user database.User) error {
 	})
 
 	if err != nil {
-		return fmt.Errorf("Can not delete feed: ", err)
+		return fmt.Errorf("Can not delete feed: %v", err)
 	}
 
 	return nil
