@@ -94,21 +94,46 @@ func handleGetAllUsers(s *State, cmd Command) error {
 }
 
 func handleAggregate(s *State, command Command) error {
-	if len(command.args) == 0 || len(command.args[0]) == 0 {
-		return fmt.Errorf("agg command requires not empty feed url argument")
+	if len(command.args) == 0 {
+		return fmt.Errorf("agg command requires time_between_reqs param")
 	}
-	feed, err := rss.FetchFeed(context.Background(), command.args[0])
+
+	scrapeFeed := func(db *database.Queries) error {
+		next, err := db.GetNextFeedToFetch(context.Background())
+		if err != nil {
+			return fmt.Errorf("Can not get next feed for fetching: %v", err)
+		}
+
+		feed, err := rss.FetchFeed(context.Background(), next.Url)
+		if err != nil {
+			return fmt.Errorf("Can not fetch feed update: %v", err)
+		}
+
+		err = db.MarkFeedFetched(context.Background(), next.ID)
+		if err != nil {
+			return fmt.Errorf("Can not mark feed as fetched: %v", err)
+		}
+
+		fmt.Println("Feed items:")
+		for _, item := range feed.Channel.Items {
+			fmt.Println(item.Title)
+		}
+
+		return nil
+	}
+
+	timeBetweenReqs, err := time.ParseDuration(command.args[0])
 	if err != nil {
-		return err
+		return fmt.Errorf("invalid duration: %v", err)
 	}
-	fmt.Printf(
-		"feed received: %v, link (%v), description (%v), items count: %v\n",
-		feed.Channel.Title,
-		feed.Channel.Link,
-		feed.Channel.Description,
-		len(feed.Channel.Items),
-	)
-	return nil
+
+	ticker := time.NewTicker(timeBetweenReqs)
+	for ; ; <-ticker.C {
+		err = scrapeFeed(s.db)
+		if err != nil {
+			return err
+		}
+	}
 }
 
 func handleAddFeed(s *State, command Command, user database.User) error {
