@@ -19,3 +19,8 @@ values (
   $7,
   $8
 ) RETURNING *;
+
+-- name: GetPostsForUser :many
+select * from posts
+order by published_at DESC 
+limit @lim;
