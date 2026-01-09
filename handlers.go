@@ -12,6 +12,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/hreshchyshynt/gator/internal/database"
 	"github.com/hreshchyshynt/gator/internal/rss"
+	"github.com/lib/pq"
 )
 
 func handleLogin(s *State, cmd Command) error {
@@ -104,6 +105,7 @@ func handleAggregate(s *State, command Command) error {
 		if err != nil {
 			return fmt.Errorf("Can not get next feed for fetching: %v", err)
 		}
+		fmt.Printf("Fetching posts for %v...\n", feed.Name)
 
 		rssFeed, err := rss.FetchFeed(context.Background(), feed.Url)
 		if err != nil {
@@ -115,10 +117,37 @@ func handleAggregate(s *State, command Command) error {
 			return fmt.Errorf("Can not mark feed as fetched: %v", err)
 		}
 
-		fmt.Println("Feed items:")
 		for _, item := range rssFeed.Channel.Items {
-			fmt.Println(item.Title)
+			now := time.Now()
+			pubAt, err := parsePostDate(item.PubDate)
+			if err != nil {
+				fmt.Printf("Error parsing date (%v): %v\n", item.PubDate, err)
+				continue
+			}
+			_, err = db.CreatePost(context.Background(), database.CreatePostParams{
+				ID:        uuid.New(),
+				CreatedAt: now,
+				UpdatedAt: now,
+				Title: sql.NullString{
+					String: item.Title,
+					Valid:  true,
+				},
+				Url: item.Link,
+				Description: sql.NullString{
+					String: item.Description,
+					Valid:  true,
+				},
+				PublishedAt: pubAt,
+				FeedID:      feed.ID,
+			})
+			var pqErr *pq.Error
+			// duplicated keys error has code 23505
+			if err != nil && errors.As(err, &pqErr) && pqErr.Code != "23505" {
+				fmt.Printf("Error during creating post: %v\n", pqErr)
+			}
 		}
+
+		fmt.Println("Posts fetched")
 
 		return nil
 	}
@@ -269,4 +298,13 @@ func handleUnfollowing(s *State, command Command, user database.User) error {
 	}
 
 	return nil
+}
+
+func parsePostDate(pubDate string) (t time.Time, err error) {
+	t, err = time.Parse(time.RFC1123Z, pubDate)
+	if err != nil {
+		t, err = time.Parse(time.RFC3339, pubDate)
+	}
+
+	return t, err
 }
