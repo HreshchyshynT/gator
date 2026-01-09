@@ -144,13 +144,23 @@ func (q *Queries) GetNextFeedToFetch(ctx context.Context) (Feed, error) {
 	return i, err
 }
 
-const markFeedFetched = `-- name: MarkFeedFetched :exec
+const markFeedFetched = `-- name: MarkFeedFetched :one
 UPDATE feeds 
 SET updated_at = NOW(), last_fetched_at = NOW()
-WHERE id = $1
+WHERE id = $1 RETURNING feeds.id, feeds.created_at, feeds.updated_at, feeds.name, feeds.url, feeds.user_id, feeds.last_fetched_at
 `
 
-func (q *Queries) MarkFeedFetched(ctx context.Context, feedID uuid.UUID) error {
-	_, err := q.db.ExecContext(ctx, markFeedFetched, feedID)
-	return err
+func (q *Queries) MarkFeedFetched(ctx context.Context, feedID uuid.UUID) (Feed, error) {
+	row := q.db.QueryRowContext(ctx, markFeedFetched, feedID)
+	var i Feed
+	err := row.Scan(
+		&i.ID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.Name,
+		&i.Url,
+		&i.UserID,
+		&i.LastFetchedAt,
+	)
+	return i, err
 }

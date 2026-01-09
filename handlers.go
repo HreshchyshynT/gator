@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"strconv"
@@ -99,23 +100,23 @@ func handleAggregate(s *State, command Command) error {
 	}
 
 	scrapeFeed := func(db *database.Queries) error {
-		next, err := db.GetNextFeedToFetch(context.Background())
+		feed, err := db.GetNextFeedToFetch(context.Background())
 		if err != nil {
 			return fmt.Errorf("Can not get next feed for fetching: %v", err)
 		}
 
-		feed, err := rss.FetchFeed(context.Background(), next.Url)
+		rssFeed, err := rss.FetchFeed(context.Background(), feed.Url)
 		if err != nil {
 			return fmt.Errorf("Can not fetch feed update: %v", err)
 		}
 
-		err = db.MarkFeedFetched(context.Background(), next.ID)
+		feed, err = db.MarkFeedFetched(context.Background(), feed.ID)
 		if err != nil {
 			return fmt.Errorf("Can not mark feed as fetched: %v", err)
 		}
 
 		fmt.Println("Feed items:")
-		for _, item := range feed.Channel.Items {
+		for _, item := range rssFeed.Channel.Items {
 			fmt.Println(item.Title)
 		}
 
