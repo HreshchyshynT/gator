@@ -25,6 +25,10 @@ func FetchFeed(ctx context.Context, feedUrl string) (RSSFeed, error) {
 		return feed, fmt.Errorf("Can't perform request: %v", err)
 	}
 
+	if res.StatusCode != http.StatusOK {
+		return feed, fmt.Errorf("Error fetching feed: response code %v", res.StatusCode)
+	}
+
 	data, err := io.ReadAll(res.Body)
 	if err != nil {
 		return feed, fmt.Errorf("Can't read response body: %v", err)
