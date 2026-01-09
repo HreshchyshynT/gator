@@ -300,6 +300,27 @@ func handleUnfollowing(s *State, command Command, user database.User) error {
 	return nil
 }
 
+func handleBrowse(s *State, command Command, user database.User) error {
+	limit := 2
+	if len(command.args) > 0 {
+		var err error
+		limit, err = strconv.Atoi(command.args[0])
+		if err != nil {
+			return fmt.Errorf("error parsing argument: %v", err)
+		}
+	}
+	posts, err := s.db.GetPostsForUser(context.Background(), int32(limit))
+	if err != nil {
+		return fmt.Errorf("Error get posts from db: %v", err)
+	}
+
+	for i, p := range posts {
+		fmt.Printf("%v. %v\n\n", i+1, p)
+	}
+
+	return nil
+}
+
 func parsePostDate(pubDate string) (t time.Time, err error) {
 	t, err = time.Parse(time.RFC1123Z, pubDate)
 	if err != nil {

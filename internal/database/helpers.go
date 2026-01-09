@@ -30,3 +30,17 @@ func (f Feed) String() string {
 		f.UserID,
 	)
 }
+
+func (p Post) String() string {
+	return fmt.Sprintf(
+		"Post(\nID: %v\n CreatedAt: %v\n UpdatedAt: %v\n Title: %v\n Url: %v\n Description: %v\n PublishedAt: %v\n FeedID: %v\n)",
+		p.ID,
+		p.CreatedAt.Format(time.RFC3339),
+		p.UpdatedAt.Format(time.RFC3339),
+		p.Title,
+		p.Url,
+		p.Description,
+		p.PublishedAt.Format(time.RFC3339),
+		p.FeedID,
+	)
+}
