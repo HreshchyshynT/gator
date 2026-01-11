@@ -21,6 +21,8 @@ values (
 ) RETURNING *;
 
 -- name: GetPostsForUser :many
-select * from posts
+select posts.* from posts
+inner join feed_follows 
+on feed_follows.feed_id = posts.feed_id and feed_follows.user_id = @user_id
 order by published_at DESC 
 limit @lim;

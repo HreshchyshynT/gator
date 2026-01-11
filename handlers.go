@@ -309,7 +309,10 @@ func handleBrowse(s *State, command Command, user database.User) error {
 			return fmt.Errorf("error parsing argument: %v", err)
 		}
 	}
-	posts, err := s.db.GetPostsForUser(context.Background(), int32(limit))
+	posts, err := s.db.GetPostsForUser(context.Background(), database.GetPostsForUserParams{
+		Lim:    int32(limit),
+		UserID: user.ID,
+	})
 	if err != nil {
 		return fmt.Errorf("Error get posts from db: %v", err)
 	}
