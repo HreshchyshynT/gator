@@ -14,11 +14,11 @@ import (
 )
 
 func handleAggregate(s *State, command Command) error {
-	if len(command.args) == 0 {
+	if len(command.Args) == 0 {
 		return fmt.Errorf("agg command requires time_between_reqs param")
 	}
 
-	timeBetweenReqs, err := time.ParseDuration(command.args[0])
+	timeBetweenReqs, err := time.ParseDuration(command.Args[0].Name)
 	if err != nil {
 		return fmt.Errorf("invalid duration: %v", err)
 	}

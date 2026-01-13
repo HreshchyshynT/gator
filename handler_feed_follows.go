@@ -10,11 +10,11 @@ import (
 )
 
 func handleFeedFollow(s *State, command Command, user database.User) error {
-	if len(command.args) == 0 {
+	if len(command.Args) == 0 {
 		return fmt.Errorf("follow command required url argument")
 	}
 
-	url := command.args[0]
+	url := command.Args[0].Value
 
 	feed, err := s.db.GetFeedByUrl(context.Background(), url)
 	if err != nil {
@@ -58,11 +58,11 @@ func handleFollowing(s *State, command Command, user database.User) error {
 }
 
 func handleUnfollowing(s *State, command Command, user database.User) error {
-	if len(command.args) == 0 {
+	if len(command.Args) == 0 {
 		return fmt.Errorf("unfollow requires url")
 	}
 
-	url := command.args[0]
+	url := command.Args[0].Value
 
 	feed, err := s.db.GetFeedByUrl(context.Background(), url)
 

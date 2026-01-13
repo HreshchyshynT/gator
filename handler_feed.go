@@ -31,13 +31,13 @@ func handleListFeeds(s *State, command Command) error {
 }
 
 func handleAddFeed(s *State, command Command, user database.User) error {
-	args := command.args
-	if len(args) < 2 || len(args[0]) == 0 || len(args[1]) == 0 {
+	args := command.Args
+	if len(args) < 2 || len(args[0].Value) == 0 || len(args[1].Value) == 0 {
 		return fmt.Errorf("addfeed command requires not empty feed name and url arguments")
 	}
 
-	feedName := args[0]
-	feedUrl := args[1]
+	feedName := args[0].Value
+	feedUrl := args[1].Value
 
 	_, err := rss.FetchFeed(context.Background(), feedUrl)
 

@@ -12,11 +12,11 @@ import (
 )
 
 func handleLogin(s *State, cmd Command) error {
-	if len(cmd.args) == 0 {
+	if len(cmd.Args) == 0 {
 		return errors.New("login command requires username argument")
 	}
 
-	username := cmd.args[0]
+	username := cmd.Args[0].Value
 
 	user, err := s.db.GetUser(context.Background(), username)
 	if err != nil {
@@ -33,11 +33,11 @@ func handleLogin(s *State, cmd Command) error {
 }
 
 func handleRegister(s *State, cmd Command) error {
-	if len(cmd.args) == 0 {
+	if len(cmd.Args) == 0 {
 		return errors.New("register command requires username argument")
 	}
 
-	username := cmd.args[0]
+	username := cmd.Args[0].Value
 
 	now := time.Now()
 	params := database.CreateUserParams{

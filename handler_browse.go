@@ -10,9 +10,9 @@ import (
 
 func handleBrowse(s *State, command Command, user database.User) error {
 	limit := 2
-	if len(command.args) > 0 {
+	if len(command.Args) > 0 {
 		var err error
-		limit, err = strconv.Atoi(command.args[0])
+		limit, err = strconv.Atoi(command.Args[0].Value)
 		if err != nil {
 			return fmt.Errorf("error parsing argument: %v", err)
 		}
