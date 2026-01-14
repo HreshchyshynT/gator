@@ -20,9 +20,33 @@ values (
   $8
 ) RETURNING *;
 
--- name: GetPostsForUser :many
+-- name: GetPostsForUserNewest :many
 select posts.* from posts
 inner join feed_follows 
-on feed_follows.feed_id = posts.feed_id and feed_follows.user_id = @user_id
-order by published_at DESC 
+  on feed_follows.feed_id = posts.feed_id and feed_follows.user_id = @user_id
+order by posts.published_at DESC, posts.id ASC  
 limit @lim;
+
+-- name: GetPostsForUserOldest :many
+select posts.* from posts
+inner join feed_follows 
+  on feed_follows.feed_id = posts.feed_id and feed_follows.user_id = @user_id
+order by posts.published_at ASC, posts.id ASC
+limit @lim;
+
+-- name: GetPostsForUserTitle :many
+select posts.* from posts
+inner join feed_follows 
+  on feed_follows.feed_id = posts.feed_id and feed_follows.user_id = @user_id
+order by title ASC, posts.id ASC  
+limit @lim;
+
+-- name: GetPostsForUserFeed :many
+select posts.* from posts
+inner join feed_follows 
+  on feed_follows.feed_id = posts.feed_id and feed_follows.user_id = @user_id
+inner join feeds
+  on feeds.id = posts.feed_id
+order by feeds.name ASC, posts.published_at DESC, posts.id ASC 
+limit @lim;
+

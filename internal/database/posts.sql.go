@@ -72,21 +72,158 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, e
 	return i, err
 }
 
-const getPostsForUser = `-- name: GetPostsForUser :many
+const getPostsForUserFeed = `-- name: GetPostsForUserFeed :many
 select posts.id, posts.created_at, posts.updated_at, posts.title, posts.url, posts.description, posts.published_at, posts.feed_id from posts
 inner join feed_follows 
-on feed_follows.feed_id = posts.feed_id and feed_follows.user_id = $1
-order by published_at DESC 
+  on feed_follows.feed_id = posts.feed_id and feed_follows.user_id = $1
+inner join feeds
+  on feeds.id = posts.feed_id
+order by feeds.name ASC, posts.published_at DESC, posts.id ASC 
 limit $2
 `
 
-type GetPostsForUserParams struct {
+type GetPostsForUserFeedParams struct {
 	UserID uuid.UUID
 	Lim    int32
 }
 
-func (q *Queries) GetPostsForUser(ctx context.Context, arg GetPostsForUserParams) ([]Post, error) {
-	rows, err := q.db.QueryContext(ctx, getPostsForUser, arg.UserID, arg.Lim)
+func (q *Queries) GetPostsForUserFeed(ctx context.Context, arg GetPostsForUserFeedParams) ([]Post, error) {
+	rows, err := q.db.QueryContext(ctx, getPostsForUserFeed, arg.UserID, arg.Lim)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Post
+	for rows.Next() {
+		var i Post
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Title,
+			&i.Url,
+			&i.Description,
+			&i.PublishedAt,
+			&i.FeedID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPostsForUserNewest = `-- name: GetPostsForUserNewest :many
+select posts.id, posts.created_at, posts.updated_at, posts.title, posts.url, posts.description, posts.published_at, posts.feed_id from posts
+inner join feed_follows 
+  on feed_follows.feed_id = posts.feed_id and feed_follows.user_id = $1
+order by posts.published_at DESC, posts.id ASC  
+limit $2
+`
+
+type GetPostsForUserNewestParams struct {
+	UserID uuid.UUID
+	Lim    int32
+}
+
+func (q *Queries) GetPostsForUserNewest(ctx context.Context, arg GetPostsForUserNewestParams) ([]Post, error) {
+	rows, err := q.db.QueryContext(ctx, getPostsForUserNewest, arg.UserID, arg.Lim)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Post
+	for rows.Next() {
+		var i Post
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Title,
+			&i.Url,
+			&i.Description,
+			&i.PublishedAt,
+			&i.FeedID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPostsForUserOldest = `-- name: GetPostsForUserOldest :many
+select posts.id, posts.created_at, posts.updated_at, posts.title, posts.url, posts.description, posts.published_at, posts.feed_id from posts
+inner join feed_follows 
+  on feed_follows.feed_id = posts.feed_id and feed_follows.user_id = $1
+order by posts.published_at ASC, posts.id ASC
+limit $2
+`
+
+type GetPostsForUserOldestParams struct {
+	UserID uuid.UUID
+	Lim    int32
+}
+
+func (q *Queries) GetPostsForUserOldest(ctx context.Context, arg GetPostsForUserOldestParams) ([]Post, error) {
+	rows, err := q.db.QueryContext(ctx, getPostsForUserOldest, arg.UserID, arg.Lim)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Post
+	for rows.Next() {
+		var i Post
+		if err := rows.Scan(
+			&i.ID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Title,
+			&i.Url,
+			&i.Description,
+			&i.PublishedAt,
+			&i.FeedID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPostsForUserTitle = `-- name: GetPostsForUserTitle :many
+select posts.id, posts.created_at, posts.updated_at, posts.title, posts.url, posts.description, posts.published_at, posts.feed_id from posts
+inner join feed_follows 
+  on feed_follows.feed_id = posts.feed_id and feed_follows.user_id = $1
+order by title ASC, posts.id ASC  
+limit $2
+`
+
+type GetPostsForUserTitleParams struct {
+	UserID uuid.UUID
+	Lim    int32
+}
+
+func (q *Queries) GetPostsForUserTitle(ctx context.Context, arg GetPostsForUserTitleParams) ([]Post, error) {
+	rows, err := q.db.QueryContext(ctx, getPostsForUserTitle, arg.UserID, arg.Lim)
 	if err != nil {
 		return nil, err
 	}

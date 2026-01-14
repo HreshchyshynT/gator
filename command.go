@@ -21,6 +21,15 @@ type Command struct {
 	Args []Argument
 }
 
+func (c Command) HasArgument(name string) bool {
+	for _, arg := range c.Args {
+		if arg.Name == name {
+			return true
+		}
+	}
+	return false
+}
+
 func (c Command) String() string {
 	var builder strings.Builder
 
