@@ -83,12 +83,3 @@ func scrapeFeed(db *database.Queries) error {
 
 	return nil
 }
-
-func parsePostDate(pubDate string) (t time.Time, err error) {
-	t, err = time.Parse(time.RFC1123Z, pubDate)
-	if err != nil {
-		t, err = time.Parse(time.RFC3339, pubDate)
-	}
-
-	return t, err
-}

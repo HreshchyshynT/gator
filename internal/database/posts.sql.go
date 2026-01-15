@@ -78,17 +78,28 @@ inner join feed_follows
   on feed_follows.feed_id = posts.feed_id and feed_follows.user_id = $1
 inner join feeds
   on feeds.id = posts.feed_id
+where 
+  ($2::text is NULL or feeds.name = $2)
+  AND 
+  ($3::timestamp is NULL or posts.published_at > $3)
 order by feeds.name ASC, posts.published_at DESC, posts.id ASC 
-limit $2
+limit $4
 `
 
 type GetPostsForUserFeedParams struct {
-	UserID uuid.UUID
-	Lim    int32
+	UserID   uuid.UUID
+	FeedName sql.NullString
+	Since    sql.NullTime
+	Lim      int32
 }
 
 func (q *Queries) GetPostsForUserFeed(ctx context.Context, arg GetPostsForUserFeedParams) ([]Post, error) {
-	rows, err := q.db.QueryContext(ctx, getPostsForUserFeed, arg.UserID, arg.Lim)
+	rows, err := q.db.QueryContext(ctx, getPostsForUserFeed,
+		arg.UserID,
+		arg.FeedName,
+		arg.Since,
+		arg.Lim,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -123,17 +134,30 @@ const getPostsForUserNewest = `-- name: GetPostsForUserNewest :many
 select posts.id, posts.created_at, posts.updated_at, posts.title, posts.url, posts.description, posts.published_at, posts.feed_id from posts
 inner join feed_follows 
   on feed_follows.feed_id = posts.feed_id and feed_follows.user_id = $1
+inner join feeds 
+  on feeds.id = posts.feed_id
+where 
+  ($2::text is NULL or feeds.name = $2)
+  AND 
+  ($3::timestamp is NULL or posts.published_at > $3)
 order by posts.published_at DESC, posts.id ASC  
-limit $2
+limit $4
 `
 
 type GetPostsForUserNewestParams struct {
-	UserID uuid.UUID
-	Lim    int32
+	UserID   uuid.UUID
+	FeedName sql.NullString
+	Since    sql.NullTime
+	Lim      int32
 }
 
 func (q *Queries) GetPostsForUserNewest(ctx context.Context, arg GetPostsForUserNewestParams) ([]Post, error) {
-	rows, err := q.db.QueryContext(ctx, getPostsForUserNewest, arg.UserID, arg.Lim)
+	rows, err := q.db.QueryContext(ctx, getPostsForUserNewest,
+		arg.UserID,
+		arg.FeedName,
+		arg.Since,
+		arg.Lim,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -168,17 +192,30 @@ const getPostsForUserOldest = `-- name: GetPostsForUserOldest :many
 select posts.id, posts.created_at, posts.updated_at, posts.title, posts.url, posts.description, posts.published_at, posts.feed_id from posts
 inner join feed_follows 
   on feed_follows.feed_id = posts.feed_id and feed_follows.user_id = $1
+inner join feeds 
+  on feeds.id = posts.feed_id
+where 
+  ($2::text is NULL or feeds.name = $2)
+  AND 
+  ($3::timestamp is NULL or posts.published_at > $3)
 order by posts.published_at ASC, posts.id ASC
-limit $2
+limit $4
 `
 
 type GetPostsForUserOldestParams struct {
-	UserID uuid.UUID
-	Lim    int32
+	UserID   uuid.UUID
+	FeedName sql.NullString
+	Since    sql.NullTime
+	Lim      int32
 }
 
 func (q *Queries) GetPostsForUserOldest(ctx context.Context, arg GetPostsForUserOldestParams) ([]Post, error) {
-	rows, err := q.db.QueryContext(ctx, getPostsForUserOldest, arg.UserID, arg.Lim)
+	rows, err := q.db.QueryContext(ctx, getPostsForUserOldest,
+		arg.UserID,
+		arg.FeedName,
+		arg.Since,
+		arg.Lim,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -213,17 +250,30 @@ const getPostsForUserTitle = `-- name: GetPostsForUserTitle :many
 select posts.id, posts.created_at, posts.updated_at, posts.title, posts.url, posts.description, posts.published_at, posts.feed_id from posts
 inner join feed_follows 
   on feed_follows.feed_id = posts.feed_id and feed_follows.user_id = $1
+inner join feeds 
+  on feeds.id = posts.feed_id
+where 
+  ($2::text is NULL or feeds.name = $2)
+  AND 
+  ($3::timestamp is NULL or posts.published_at > $3)
 order by title ASC, posts.id ASC  
-limit $2
+limit $4
 `
 
 type GetPostsForUserTitleParams struct {
-	UserID uuid.UUID
-	Lim    int32
+	UserID   uuid.UUID
+	FeedName sql.NullString
+	Since    sql.NullTime
+	Lim      int32
 }
 
 func (q *Queries) GetPostsForUserTitle(ctx context.Context, arg GetPostsForUserTitleParams) ([]Post, error) {
-	rows, err := q.db.QueryContext(ctx, getPostsForUserTitle, arg.UserID, arg.Lim)
+	rows, err := q.db.QueryContext(ctx, getPostsForUserTitle,
+		arg.UserID,
+		arg.FeedName,
+		arg.Since,
+		arg.Lim,
+	)
 	if err != nil {
 		return nil, err
 	}

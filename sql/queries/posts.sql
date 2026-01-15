@@ -24,6 +24,12 @@ values (
 select posts.* from posts
 inner join feed_follows 
   on feed_follows.feed_id = posts.feed_id and feed_follows.user_id = @user_id
+inner join feeds 
+  on feeds.id = posts.feed_id
+where 
+  (sqlc.narg('feed_name')::text is NULL or feeds.name = sqlc.narg('feed_name'))
+  AND 
+  (sqlc.narg('since')::timestamp is NULL or posts.published_at > sqlc.narg('since'))
 order by posts.published_at DESC, posts.id ASC  
 limit @lim;
 
@@ -31,6 +37,12 @@ limit @lim;
 select posts.* from posts
 inner join feed_follows 
   on feed_follows.feed_id = posts.feed_id and feed_follows.user_id = @user_id
+inner join feeds 
+  on feeds.id = posts.feed_id
+where 
+  (sqlc.narg('feed_name')::text is NULL or feeds.name = sqlc.narg('feed_name'))
+  AND 
+  (sqlc.narg('since')::timestamp is NULL or posts.published_at > sqlc.narg('since'))
 order by posts.published_at ASC, posts.id ASC
 limit @lim;
 
@@ -38,6 +50,12 @@ limit @lim;
 select posts.* from posts
 inner join feed_follows 
   on feed_follows.feed_id = posts.feed_id and feed_follows.user_id = @user_id
+inner join feeds 
+  on feeds.id = posts.feed_id
+where 
+  (sqlc.narg('feed_name')::text is NULL or feeds.name = sqlc.narg('feed_name'))
+  AND 
+  (sqlc.narg('since')::timestamp is NULL or posts.published_at > sqlc.narg('since'))
 order by title ASC, posts.id ASC  
 limit @lim;
 
@@ -47,6 +65,10 @@ inner join feed_follows
   on feed_follows.feed_id = posts.feed_id and feed_follows.user_id = @user_id
 inner join feeds
   on feeds.id = posts.feed_id
+where 
+  (sqlc.narg('feed_name')::text is NULL or feeds.name = sqlc.narg('feed_name'))
+  AND 
+  (sqlc.narg('since')::timestamp is NULL or posts.published_at > sqlc.narg('since'))
 order by feeds.name ASC, posts.published_at DESC, posts.id ASC 
 limit @lim;
 
