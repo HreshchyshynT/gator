@@ -31,7 +31,7 @@ where
   AND 
   (sqlc.narg('since')::timestamp is NULL or posts.published_at > sqlc.narg('since'))
 order by posts.published_at DESC, posts.id ASC  
-limit @lim;
+limit @lim offset @off;
 
 -- name: GetPostsForUserOldest :many
 select posts.* from posts
@@ -44,7 +44,7 @@ where
   AND 
   (sqlc.narg('since')::timestamp is NULL or posts.published_at > sqlc.narg('since'))
 order by posts.published_at ASC, posts.id ASC
-limit @lim;
+limit @lim offset @off;
 
 -- name: GetPostsForUserTitle :many
 select posts.* from posts
@@ -57,7 +57,7 @@ where
   AND 
   (sqlc.narg('since')::timestamp is NULL or posts.published_at > sqlc.narg('since'))
 order by title ASC, posts.id ASC  
-limit @lim;
+limit @lim offset @off;
 
 -- name: GetPostsForUserFeed :many
 select posts.* from posts
@@ -70,5 +70,5 @@ where
   AND 
   (sqlc.narg('since')::timestamp is NULL or posts.published_at > sqlc.narg('since'))
 order by feeds.name ASC, posts.published_at DESC, posts.id ASC 
-limit @lim;
+limit @lim offset @off;
 

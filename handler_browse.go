@@ -18,24 +18,27 @@ const (
 	sortTitle  = "title"
 	sortFeed   = "feed"
 
-	limitArg = "limit"
-	sortArg  = "sort"
-	feedArg  = "feed"
-	sinceArg = "since"
+	limitArg  = "limit"
+	sortArg   = "sort"
+	feedArg   = "feed"
+	sinceArg  = "since"
+	offsetArg = "offset"
 )
 
 type browseOptions struct {
-	limit int32
-	sort  string
-	feed  sql.NullString
-	since sql.NullTime
+	limit  int32
+	sort   string
+	feed   sql.NullString
+	since  sql.NullTime
+	offset int32
 }
 
 func defaultOptions() browseOptions {
 	return browseOptions{
-		limit: int32(2),
-		feed:  sql.NullString{Valid: false},
-		since: sql.NullTime{Valid: false},
+		limit:  int32(2),
+		feed:   sql.NullString{Valid: false},
+		since:  sql.NullTime{Valid: false},
+		offset: int32(0),
 	}
 }
 
@@ -73,6 +76,7 @@ func getBrowseWithSorting(
 				Lim:      options.limit,
 				Since:    options.since,
 				FeedName: options.feed,
+				Off:      options.offset,
 			})
 		case sortFeed:
 			return s.db.GetPostsForUserFeed(ctx, database.GetPostsForUserFeedParams{
@@ -80,6 +84,7 @@ func getBrowseWithSorting(
 				Lim:      options.limit,
 				Since:    options.since,
 				FeedName: options.feed,
+				Off:      options.offset,
 			})
 		case sortTitle:
 			return s.db.GetPostsForUserTitle(ctx, database.GetPostsForUserTitleParams{
@@ -87,6 +92,7 @@ func getBrowseWithSorting(
 				Lim:      options.limit,
 				Since:    options.since,
 				FeedName: options.feed,
+				Off:      options.offset,
 			})
 		case sortNewest:
 			fallthrough
@@ -96,6 +102,7 @@ func getBrowseWithSorting(
 				Lim:      options.limit,
 				Since:    options.since,
 				FeedName: options.feed,
+				Off:      options.offset,
 			})
 		}
 	}
@@ -134,6 +141,12 @@ func parseArguments(args []Argument) (browseOptions, error) {
 				Time:  time,
 				Valid: err == nil,
 			}
+		case name == offsetArg:
+			offset, err := strconv.Atoi(arg.Value)
+			if err != nil {
+				return options, fmt.Errorf("error parsing offset: %v", err)
+			}
+			options.offset = int32(offset)
 		}
 	}
 

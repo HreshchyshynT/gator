@@ -83,13 +83,14 @@ where
   AND 
   ($3::timestamp is NULL or posts.published_at > $3)
 order by feeds.name ASC, posts.published_at DESC, posts.id ASC 
-limit $4
+limit $5 offset $4
 `
 
 type GetPostsForUserFeedParams struct {
 	UserID   uuid.UUID
 	FeedName sql.NullString
 	Since    sql.NullTime
+	Off      int32
 	Lim      int32
 }
 
@@ -98,6 +99,7 @@ func (q *Queries) GetPostsForUserFeed(ctx context.Context, arg GetPostsForUserFe
 		arg.UserID,
 		arg.FeedName,
 		arg.Since,
+		arg.Off,
 		arg.Lim,
 	)
 	if err != nil {
@@ -141,13 +143,14 @@ where
   AND 
   ($3::timestamp is NULL or posts.published_at > $3)
 order by posts.published_at DESC, posts.id ASC  
-limit $4
+limit $5 offset $4
 `
 
 type GetPostsForUserNewestParams struct {
 	UserID   uuid.UUID
 	FeedName sql.NullString
 	Since    sql.NullTime
+	Off      int32
 	Lim      int32
 }
 
@@ -156,6 +159,7 @@ func (q *Queries) GetPostsForUserNewest(ctx context.Context, arg GetPostsForUser
 		arg.UserID,
 		arg.FeedName,
 		arg.Since,
+		arg.Off,
 		arg.Lim,
 	)
 	if err != nil {
@@ -199,13 +203,14 @@ where
   AND 
   ($3::timestamp is NULL or posts.published_at > $3)
 order by posts.published_at ASC, posts.id ASC
-limit $4
+limit $5 offset $4
 `
 
 type GetPostsForUserOldestParams struct {
 	UserID   uuid.UUID
 	FeedName sql.NullString
 	Since    sql.NullTime
+	Off      int32
 	Lim      int32
 }
 
@@ -214,6 +219,7 @@ func (q *Queries) GetPostsForUserOldest(ctx context.Context, arg GetPostsForUser
 		arg.UserID,
 		arg.FeedName,
 		arg.Since,
+		arg.Off,
 		arg.Lim,
 	)
 	if err != nil {
@@ -257,13 +263,14 @@ where
   AND 
   ($3::timestamp is NULL or posts.published_at > $3)
 order by title ASC, posts.id ASC  
-limit $4
+limit $5 offset $4
 `
 
 type GetPostsForUserTitleParams struct {
 	UserID   uuid.UUID
 	FeedName sql.NullString
 	Since    sql.NullTime
+	Off      int32
 	Lim      int32
 }
 
@@ -272,6 +279,7 @@ func (q *Queries) GetPostsForUserTitle(ctx context.Context, arg GetPostsForUserT
 		arg.UserID,
 		arg.FeedName,
 		arg.Since,
+		arg.Off,
 		arg.Lim,
 	)
 	if err != nil {
