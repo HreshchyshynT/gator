@@ -24,6 +24,7 @@ const (
 	feedArg   = "feed"
 	sinceArg  = "since"
 	offsetArg = "offset"
+	pageArg   = "page"
 )
 
 type browseOptions struct {
@@ -32,6 +33,7 @@ type browseOptions struct {
 	feed   sql.NullString
 	since  sql.NullTime
 	offset int32
+	page   int32
 }
 
 func defaultOptions() browseOptions {
@@ -40,6 +42,7 @@ func defaultOptions() browseOptions {
 		feed:   sql.NullString{Valid: false},
 		since:  sql.NullTime{Valid: false},
 		offset: int32(0),
+		page:   int32(0),
 	}
 }
 
@@ -56,6 +59,10 @@ func handleBrowse(s *State, command Command, user database.User) error {
 
 	if err != nil {
 		return fmt.Errorf("Error get posts from db: %v", err)
+	}
+
+	if options.page > 0 {
+		fmt.Printf("Displaying results for page: %v\n", options.page)
 	}
 
 	for i, p := range posts {
@@ -156,7 +163,21 @@ func parseArguments(args []Argument) (browseOptions, error) {
 				return options, fmt.Errorf("error parsing offset: %v", err)
 			}
 			options.offset = int32(offset)
+		case name == pageArg:
+			page, err := strconv.Atoi(arg.Value)
+			if err != nil {
+				return options, fmt.Errorf("error parsing page: %v", err)
+			}
+			options.page = int32(page)
 		}
+	}
+
+	if options.offset > 0 && options.page > 0 {
+		fmt.Println("Ignoring offset, page provided.")
+	}
+
+	if options.page > 0 {
+		options.offset = options.limit * (options.page - 1)
 	}
 
 	return options, nil
