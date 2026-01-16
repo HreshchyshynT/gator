@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/hreshchyshynt/gator/internal/database"
@@ -58,7 +59,15 @@ func handleBrowse(s *State, command Command, user database.User) error {
 	}
 
 	for i, p := range posts {
-		fmt.Printf("%v. %v\n\n", i+1, p)
+		publishedAt := p.PublishedAt.Format(time.DateTime)
+		fmt.Printf(
+			"%v. %v\nDescription: %v\nPublishedAt: %v\nUrl: %v\n",
+			i+1,
+			p.Title,
+			p.Description,
+			publishedAt,
+			p.Url,
+		)
 	}
 
 	return nil
