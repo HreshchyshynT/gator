@@ -55,26 +55,44 @@ func handleBrowse(s *State, command Command, user database.User) error {
 
 	browse := getBrowseWithSorting(s, options.sort)
 
-	posts, err := browse(context.Background(), options, user.ID)
+	for {
+		posts, err := browse(context.Background(), options, user.ID)
 
-	if err != nil {
-		return fmt.Errorf("Error get posts from db: %v", err)
-	}
+		if err != nil {
+			return fmt.Errorf("Error get posts from db: %v", err)
+		}
 
-	if options.page > 0 {
-		fmt.Printf("Displaying results for page: %v\n", options.page)
-	}
+		if options.page > 0 {
+			fmt.Printf("Displaying results for page: %v\n", options.page)
+		}
 
-	for i, p := range posts {
-		publishedAt := p.PublishedAt.Format(time.DateTime)
-		fmt.Printf(
-			"%v. %v\nDescription: %v\nPublishedAt: %v\nUrl: %v\n",
-			i+1,
-			p.Title,
-			p.Description,
-			publishedAt,
-			p.Url,
-		)
+		for i, p := range posts {
+			publishedAt := p.PublishedAt.Format(time.DateTime)
+			fmt.Printf(
+				"%v. %v\nDescription: %v\nPublishedAt: %v\nUrl: %v\n",
+				i+1+int(options.offset),
+				p.Title,
+				p.Description,
+				publishedAt,
+				p.Url,
+			)
+		}
+		if len(posts) < int(options.limit) {
+			break
+		}
+
+		fmt.Println("Press Enter for more...")
+		var char rune
+		// TODO: fix when typing exit, e is read and xit is passed to terminal
+		_, err = fmt.Scanf("%c", &char)
+		if err != nil {
+			return err
+		}
+		if char != '\n' {
+			break
+		}
+		options.page += 1
+		options.offset += options.limit
 	}
 
 	return nil
