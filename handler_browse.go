@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"database/sql"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -82,15 +84,14 @@ func handleBrowse(s *State, command Command, user database.User) error {
 		}
 
 		fmt.Println("Press Enter for more...")
-		var char rune
-		// TODO: fix when typing exit, e is read and xit is passed to terminal
-		_, err = fmt.Scanf("%c", &char)
-		if err != nil {
+
+		reader := bufio.NewReader(os.Stdin)
+		r, _, err := reader.ReadRune()
+
+		if err != nil || r != '\n' {
 			return err
 		}
-		if char != '\n' {
-			break
-		}
+
 		options.page += 1
 		options.offset += options.limit
 	}
