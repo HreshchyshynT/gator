@@ -1,11 +1,11 @@
-package main
+package utils
 
 import (
 	"fmt"
 	"time"
 )
 
-func parsePostDate(dateString string) (t time.Time, err error) {
+func ParseDate(dateString string) (t time.Time, err error) {
 	layouts := []string{
 		time.RFC1123Z,
 		time.RFC3339,

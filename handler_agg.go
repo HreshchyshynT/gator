@@ -3,13 +3,13 @@ package main
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/hreshchyshynt/gator/internal/database"
 	"github.com/hreshchyshynt/gator/internal/rss"
+	"github.com/hreshchyshynt/gator/internal/utils"
 	"github.com/lib/pq"
 )
 
@@ -51,7 +51,7 @@ func scrapeFeed(db *database.Queries) error {
 
 	for _, item := range rssFeed.Channel.Items {
 		now := time.Now()
-		pubAt, err := parsePostDate(item.PubDate)
+		pubAt, err := utils.ParseDate(item.PubDate)
 		if err != nil {
 			fmt.Printf("Error parsing date (%v): %v\n", item.PubDate, err)
 			continue
@@ -73,8 +73,7 @@ func scrapeFeed(db *database.Queries) error {
 			FeedID:      feed.ID,
 		})
 		var pqErr *pq.Error
-		// duplicated keys error has code 23505
-		if err != nil && errors.As(err, &pqErr) && pqErr.Code != "23505" {
+		if err != nil && !utils.IsDuplicatedKeys(err) {
 			fmt.Printf("Error during creating post: %v\n", pqErr)
 		}
 	}

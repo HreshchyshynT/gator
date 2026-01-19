@@ -12,6 +12,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/hreshchyshynt/gator/internal/database"
+	"github.com/hreshchyshynt/gator/internal/utils"
 )
 
 const (
@@ -168,7 +169,7 @@ func parseArguments(args []Argument) (browseOptions, error) {
 				Valid:  len(arg.Value) > 0,
 			}
 		case name == sinceArg:
-			time, err := parsePostDate(arg.Value)
+			time, err := utils.ParseDate(arg.Value)
 			if err != nil {
 				fmt.Printf("%v, ignoring \"since\" parameter\n", err)
 			}
