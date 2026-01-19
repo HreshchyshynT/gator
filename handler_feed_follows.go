@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/hreshchyshynt/gator/internal/database"
+	"github.com/hreshchyshynt/gator/internal/utils"
 )
 
 const (
@@ -61,6 +62,10 @@ func handleFeedFollow(s *State, command Command, user database.User) error {
 		ID:        uuid.New(),
 	}
 	feedFollowRow, err := s.db.CreateFeedFollow(context.Background(), params)
+
+	if utils.IsDuplicatedKeys(err) {
+		return fmt.Errorf("Already following %v", feed.Name)
+	}
 
 	if err != nil {
 		return fmt.Errorf("Error following the feed: %v", err)
