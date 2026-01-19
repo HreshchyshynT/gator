@@ -3,22 +3,52 @@ package main
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/hreshchyshynt/gator/internal/database"
 )
 
-func handleFeedFollow(s *State, command Command, user database.User) error {
-	if len(command.Args) == 0 {
-		return fmt.Errorf("follow command required url argument")
+const (
+	nameArg = "name"
+)
+
+type followOptions struct {
+	name string
+	url  string
+}
+
+func (fo followOptions) String() string {
+	var builder strings.Builder
+
+	if fo.name != "" {
+		builder.WriteString(fmt.Sprintf("name = %v", fo.name))
+		if fo.url != "" {
+			builder.WriteString(", ")
+		}
+	}
+	if fo.url != "" {
+		builder.WriteString(fmt.Sprintf("url = %v", fo.url))
 	}
 
-	url := command.Args[0].Value
+	return builder.String()
+}
 
-	feed, err := s.db.GetFeedByUrl(context.Background(), url)
+func newFollowOptions() followOptions {
+	return followOptions{}
+}
+
+func handleFeedFollow(s *State, command Command, user database.User) error {
+	options, err := parseOptions(command.Args)
 	if err != nil {
-		return fmt.Errorf("Can't find feed for url: %v", url)
+		return err
+	}
+	dbCall := getFeedCall(options)
+	feed, err := dbCall(*s.db, context.Background())
+
+	if err != nil {
+		return fmt.Errorf("Can't find feed for %v", options)
 	}
 
 	now := time.Now()
@@ -58,13 +88,13 @@ func handleFollowing(s *State, command Command, user database.User) error {
 }
 
 func handleUnfollowing(s *State, command Command, user database.User) error {
-	if len(command.Args) == 0 {
-		return fmt.Errorf("unfollow requires url")
+	options, err := parseOptions(command.Args)
+	if err != nil {
+		return err
 	}
 
-	url := command.Args[0].Value
-
-	feed, err := s.db.GetFeedByUrl(context.Background(), url)
+	dbCall := getFeedCall(options)
+	feed, err := dbCall(*s.db, context.Background())
 
 	if err != nil {
 		return fmt.Errorf("Error unfollow feed: %v", err)
@@ -80,4 +110,33 @@ func handleUnfollowing(s *State, command Command, user database.User) error {
 	}
 
 	return nil
+}
+
+func getFeedCall(
+	options followOptions,
+) func(database.Queries, context.Context) (database.Feed, error) {
+	switch {
+	case options.name != "":
+		return func(db database.Queries, ctx context.Context) (database.Feed, error) {
+			return db.GetFeedByName(ctx, options.name)
+		}
+	default:
+		return func(db database.Queries, ctx context.Context) (database.Feed, error) {
+			return db.GetFeedByUrl(ctx, options.url)
+		}
+	}
+}
+func parseOptions(args []Argument) (followOptions, error) {
+	options := newFollowOptions()
+	if len(args) == 0 {
+		return options, fmt.Errorf("command required either unnamed feed url or --name=\"feed name\" argument")
+	}
+
+	switch args[0].Name {
+	case "":
+		options.url = args[0].Value
+	case nameArg:
+		options.name = args[0].Value
+	}
+	return options, nil
 }
