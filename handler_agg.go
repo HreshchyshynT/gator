@@ -18,9 +18,9 @@ func handleAggregate(s *State, command Command) error {
 		return fmt.Errorf("agg command requires time_between_reqs param")
 	}
 
-	timeBetweenReqs, err := time.ParseDuration(command.Args[0].Name)
+	timeBetweenReqs, err := time.ParseDuration(command.Args[0].Value)
 	if err != nil {
-		return fmt.Errorf("invalid duration: %v", err)
+		return err
 	}
 
 	ticker := time.NewTicker(timeBetweenReqs)
