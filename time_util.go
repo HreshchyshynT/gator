@@ -9,6 +9,7 @@ func parsePostDate(dateString string) (t time.Time, err error) {
 	layouts := []string{
 		time.RFC1123Z,
 		time.RFC3339,
+		time.RFC1123,
 		"02-01-2006",
 		"02/01/2006",
 		"01/2006",
