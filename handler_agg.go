@@ -10,7 +10,6 @@ import (
 	"github.com/hreshchyshynt/gator/internal/database"
 	"github.com/hreshchyshynt/gator/internal/rss"
 	"github.com/hreshchyshynt/gator/internal/utils"
-	"github.com/lib/pq"
 )
 
 func handleAggregate(s *State, command Command) error {
@@ -72,9 +71,8 @@ func scrapeFeed(db *database.Queries) error {
 			PublishedAt: pubAt,
 			FeedID:      feed.ID,
 		})
-		var pqErr *pq.Error
 		if err != nil && !utils.IsDuplicatedKeys(err) {
-			fmt.Printf("Error during creating post: %v\n", pqErr)
+			fmt.Printf("Error during creating post: %v\n", err)
 		}
 	}
 
