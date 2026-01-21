@@ -35,6 +35,7 @@ func main() {
 	commands.Register("following", middlewareLoggedIn(handleFollowing))
 	commands.Register("unfollow", middlewareLoggedIn(handleUnfollowing))
 	commands.Register("browse", middlewareLoggedIn(handleBrowse))
+	commands.Register("fetch", handleFetch)
 
 	args := os.Args
 

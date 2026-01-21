@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -31,6 +32,21 @@ func handleAggregate(s *State, command Command) error {
 	}
 }
 
+func handleFetch(s *State, command Command) error {
+	if len(command.Args) == 0 {
+		return errors.New("fetch command required feed name argument")
+	}
+	name := command.Args[0].Value
+
+	feed, err := s.db.GetFeedByName(context.Background(), name)
+	if err != nil {
+		return err
+	}
+
+	return fetchFeed(s.db, feed)
+
+}
+
 func scrapeFeed(db *database.Queries) error {
 	feed, err := db.GetNextFeedToFetch(context.Background())
 	if err != nil {
@@ -38,6 +54,10 @@ func scrapeFeed(db *database.Queries) error {
 	}
 	fmt.Printf("Fetching posts for %v...\n", feed.Name)
 
+	return fetchFeed(db, feed)
+}
+
+func fetchFeed(db *database.Queries, feed database.Feed) error {
 	rssFeed, err := rss.FetchFeed(context.Background(), feed.Url)
 	if err != nil {
 		return fmt.Errorf("Can not fetch feed update: %v", err)
@@ -76,7 +96,6 @@ func scrapeFeed(db *database.Queries) error {
 		}
 	}
 
-	fmt.Println("Posts fetched")
-
+	fmt.Printf("%v posts fetched\n", len(rssFeed.Channel.Items))
 	return nil
 }
