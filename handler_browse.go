@@ -74,8 +74,8 @@ func handleBrowse(s *State, command Command, user database.User) error {
 			fmt.Printf(
 				"%v. %v\nDescription: %v\nPublishedAt: %v\nUrl: %v\n",
 				i+1+int(options.offset),
-				p.Title,
-				p.Description,
+				p.Title.String,
+				p.Description.String,
 				publishedAt,
 				p.Url,
 			)
