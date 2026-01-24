@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"os"
 
@@ -41,6 +42,12 @@ func main() {
 
 	if len(args) < 2 {
 		log.Fatalln("No arguments provided")
+	}
+
+	if args[1] == "--server" {
+		fmt.Println("serving a web server")
+		handleServer(commands)
+		return
 	}
 
 	command := NewCommand(
